@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <section style="display: none;">
+      <label for="nameInput">連接的id</label>
+      <input type="text" id="nameInput" value="testtesttest" />
+      <button onclick="ws()">連接</button>
+    </section>
+
+    <section style="display: none;">
+      <div>
+        <!-- 連接成功後，給某id發送訊息 -->
+        <label for="seenId">給誰發送訊息</label>
+        <input type="text" id="seenId" />
+      </div>
+      <div>
+        <label for="sendContent">發送的內容</label>
+        <input type="text" id="sendContent" />
+        <button onclick="send()">發送</button>
+      </div>
+    </section>
+
+<section>
+  <label for="sendMsgInput">連接的id</label>
+  <input type="text" id="sendMsgInput" value="testtesttest" />
+  <button onclick="sendMsg()">發送</button>
+</section>
+
+  </head>
+  <body>
+    <script type="text/javascript">
+      var webs = null
+      var mId = null
+
+      /**/
+      function ws() {
+        mId = document.getElementById("nameInput").value
+        webs = new WebSocket("ws://localhost:3000/koa/ws?id=" + mId)
+
+        webs.onopen = function (event) {
+          console.log("客戶端連接成功")
+        }
+
+        webs.onclose = () => {
+          console.log("close connection")
+        }
+
+        // 接收服務氣發送的訊息
+        webs.onmessage = function (event) {
+          console.log("客戶端收到訊息: ", event.data)
+        }
+      }
+
+      /* 給特定ID發送訊息，後端接受後會像該ID發送 */
+      function send() {
+        const id = document.getElementById("seenId")
+        const content = document.getElementById("sendContent").value
+        var _data = {
+          mId,
+          uId: id,
+          content,
+        }
+
+        webs.send(JSON.stringify(_data))
+      }
+    </script>
+
+
+<script>
+//使用 WebSocket 的網址向 Server 開啟連結
+let ws2 = new WebSocket('ws://localhost:3000')
+
+//開啟後執行的動作，指定一個 function 會在連結 WebSocket 後執行
+ws2.onopen = () => {
+    console.log('open connection')
+}
+
+//接收 Server 發送的訊息
+ws2.onmessage = event => {
+    console.log(event)
+    console.log(event.data) // 溝通的詳細訊息，從 Server 回傳的資料會在 event 的 data 屬性中
+}
+
+
+//關閉後執行的動作，指定一個 function 會在連結中斷後執行
+ws2.onclose = data => {
+  // debugger
+    console.log('close connection: ', data)
+}
+
+
+/** 發送訊息 */
+function sendMsg(){
+  ws2.send(document.getElementById('sendMsgInput').value)
+}
+</script>
+  </body>
+</html>
